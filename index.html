@@ -16,67 +16,68 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start; /* Cambiado para dar aire arriba */
             min-height: 100vh;
             overflow: hidden;
-            touch-action: manipulation; /* Evita zooms raros en móviles */
+            touch-action: manipulation;
         }
 
         .contenedor {
             width: 90%;
-            z-index: 100;
+            margin-top: 50px;
+            z-index: 1000; /* Texto y GIF siempre visibles */
+            position: relative;
+            pointer-events: none; /* Permite tocar botones detrás del contenedor si es necesario */
+        }
+
+        .contenedor h1, .contenedor img {
+            pointer-events: auto; /* Pero el GIF y texto sí reaccionan */
         }
 
         img {
-            width: 220px; /* Un poco más pequeño para que quepa bien en el móvil */
+            width: 180px; 
             border-radius: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 10px;
         }
 
         h1 {
-            font-size: 1.5em;
-            margin-bottom: 20px;
-            padding: 0 10px;
-        }
-
-        .botones {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 15px;
-            position: relative;
-            min-height: 120px;
-        }
-
-        button {
-            padding: 12px 20px;
-            font-family: 'Pacifico', cursive;
-            font-size: 1.1em;
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            white-space: nowrap;
-            -webkit-tap-highlight-color: transparent; /* Quita el cuadro azul al tocar en móvil */
+            font-size: 1.4em;
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 5px rgba(255,255,255,0.8);
         }
 
         #siBtn {
+            padding: 15px 30px;
+            font-family: 'Pacifico', cursive;
+            font-size: 1.2em;
             background-color: #ff1493;
             color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
             z-index: 9999;
             position: relative;
+            pointer-events: auto;
         }
 
         .no-clon, #noBtnOriginal {
+            padding: 8px 15px; /* Más pequeños para no tapar todo */
+            font-family: 'Pacifico', cursive;
+            font-size: 0.9em;
             background-color: #808080;
             color: white;
+            border: none;
+            border-radius: 50px;
             position: absolute;
-            z-index: 50;
+            z-index: 10;
             transition: all 0.2s ease;
+            white-space: nowrap;
         }
 
         #noBtnOriginal {
             display: none;
+            top: 60%; /* Posición inicial lejos del texto */
         }
 
         .corazon-bg {
@@ -99,12 +100,10 @@
     <div class="contenedor">
         <img id="gifMain" src="https://media.giphy.com/media/EOpZ7XsVfTN2E/giphy.gif" alt="Minion">
         <h1 id="textoMensaje">Jessi, tengo algo que preguntarte...</h1>
-
-        <div class="botones">
-            <button id="siBtn">¡Cuéntame! 🤔</button>
-            <button id="noBtnOriginal">No, feo 🤨</button>
-        </div>
+        <button id="siBtn">¡Cuéntame! 🤔</button>
     </div>
+
+    <button id="noBtnOriginal">No, feo 🤨</button>
 
     <script>
         const gifMain = document.getElementById('gifMain');
@@ -115,20 +114,22 @@
         let etapa = 0; 
         let siScale = 1;
 
-        function moverBotonCerca(boton) {
-            const rango = 150; // Rango más corto para pantallas de móvil
-            const rect = boton.getBoundingClientRect();
-            
-            let newX = rect.left + (Math.random() - 0.5) * rango * 2;
-            let newY = rect.top + (Math.random() - 0.5) * rango * 2;
+        function moverBotonLejos(boton) {
+            // Evitamos la zona central (donde está el texto y el botón SI)
+            // Calculamos posiciones que tiendan a irse a los bordes
+            let newX, newY;
+            const margin = 20;
 
-            // Ajuste para que no se pierda fuera de la pantalla del celular
-            newX = Math.max(20, Math.min(newX, window.innerWidth - rect.width - 20));
-            newY = Math.max(20, Math.min(newY, window.innerHeight - rect.height - 20));
+            // Decidir si va a la mitad superior o inferior, izquierda o derecha
+            newX = Math.random() < 0.5 ? 
+                   Math.random() * 30 : // Lado izquierdo (0-30%)
+                   Math.random() * 30 + 70; // Lado derecho (70-100%)
+            
+            newY = Math.random() * 80 + 10; // Cualquier altura
 
             boton.style.position = "fixed";
-            boton.style.left = `${newX}px`;
-            boton.style.top = `${newY}px`;
+            boton.style.left = `${newX}vw`;
+            boton.style.top = `${newY}vh`;
         }
 
         function crearClonNo() {
@@ -136,8 +137,7 @@
             nuevoNo.innerText = "No, feo 🤨";
             nuevoNo.classList.add('no-clon');
             
-            nuevoNo.style.left = (Math.random() * 50 + 25) + "%";
-            nuevoNo.style.top = (Math.random() * 50 + 25) + "%";
+            moverBotonLejos(nuevoNo);
 
             const accionHuir = (e) => {
                 e.preventDefault();
@@ -152,21 +152,21 @@
 
         function huirYClonar(boton) {
             if (etapa === 1) {
-                moverBotonCerca(boton);
-                siScale += 0.3;
+                moverBotonLejos(boton);
+                siScale += 0.25; // Crece un poco más lento para no tapar todo tan rápido
                 siBtn.style.transform = `scale(${siScale})`;
                 crearClonNo();
             }
         }
 
-        siBtn.addEventListener('click', (e) => {
+        siBtn.addEventListener('click', () => {
             if (etapa === 0) {
                 etapa = 1;
                 gifMain.src = "https://media.giphy.com/media/lCP95tGSbMmWI/giphy.gif";
                 textoMensaje.innerText = "¿Jessi, puedo ser tu San Valentín?";
                 siBtn.innerText = "Si, mi negro♥️";
                 noBtnOriginal.style.display = "block";
-                noBtnOriginal.style.position = "static";
+                moverBotonLejos(noBtnOriginal);
             } else if (etapa === 1) {
                 etapa = 2;
                 gifMain.src = "https://media.giphy.com/media/mPOGx4hJtOWSA/giphy.gif";
