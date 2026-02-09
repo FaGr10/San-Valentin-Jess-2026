@@ -24,6 +24,7 @@
             width: 90%;
             max-width: 600px;
             padding: 20px;
+            z-index: 10;
         }
 
         img {
@@ -34,8 +35,9 @@
         }
 
         h1 {
-            font-size: 2em;
-            height: 80px; /* Espacio fijo para el texto */
+            font-size: 1.8em;
+            min-height: 60px;
+            margin-bottom: 30px;
         }
 
         .botones {
@@ -43,9 +45,8 @@
             justify-content: center;
             align-items: center;
             gap: 20px;
-            margin-top: 30px;
             position: relative;
-            height: 100px;
+            min-height: 120px;
         }
 
         button {
@@ -55,8 +56,9 @@
             border: none;
             border-radius: 50px;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: transform 0.2s ease;
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            white-space: nowrap;
         }
 
         #siBtn {
@@ -68,14 +70,10 @@
         #noBtn {
             background-color: #808080;
             color: white;
+            display: none;
             position: absolute;
         }
 
-        .oculto {
-            display: none;
-        }
-
-        /* Corazones flotantes de fondo */
         .corazon-bg {
             position: absolute;
             color: rgba(255, 20, 147, 0.2);
@@ -95,12 +93,11 @@
 
     <div class="contenedor">
         <img id="gifMain" src="https://media.giphy.com/media/EOpZ7XsVfTN2E/giphy.gif" alt="Minion pensando">
-        
         <h1 id="textoMensaje">Jessi, tengo algo que preguntarte...</h1>
 
-        <div class="botones" id="bloqueBotones">
-            <button id="siBtn">¡Sí! 🥰</button>
-            <button id="noBtn">No 🤨</button>
+        <div class="botones">
+            <button id="siBtn">¡Cuéntame! 🤔</button>
+            <button id="noBtn">No, feo 🤨</button>
         </div>
     </div>
 
@@ -110,37 +107,37 @@
         const siBtn = document.getElementById('siBtn');
         const noBtn = document.getElementById('noBtn');
         
-        let etapa = 0; // 0: Introducción, 1: Pregunta, 2: Final
+        let etapa = 0; 
         let siScale = 1;
 
-        // Acción al hacer clic en el botón de SI
         siBtn.addEventListener('click', () => {
             if (etapa === 0) {
-                // Pasar de intro a pregunta
+                // CAMBIO A LA PREGUNTA
                 etapa = 1;
                 gifMain.src = "https://media.giphy.com/media/lCP95tGSbMmWI/giphy.gif";
                 textoMensaje.innerText = "¿Jessi, puedo ser tu San Valentín?";
-                siBtn.innerText = "¡Claro que sí! ❤️";
+                siBtn.innerText = "Si, mi negro♥️"; // Cambio aquí
+                noBtn.style.display = "block";
+                noBtn.style.position = "static"; 
             } else if (etapa === 1) {
-                // Final feliz
+                // FINAL
                 etapa = 2;
                 gifMain.src = "https://media.giphy.com/media/mPOGx4hJtOWSA/giphy.gif";
-                textoMensaje.innerText = "¡Será el mejor San Valentín! Avísale a tu novio, él ya tiene todo planeado. ¡Te quiero! 💖";
-                document.getElementById('bloqueBotones').classList.add('oculto');
+                textoMensaje.innerText = "¡Será el mejor San Valentín!";
+                siBtn.style.display = "none";
+                noBtn.style.display = "none";
             }
         });
 
-        // Hacer que el botón de NO escape y que el de SI crezca
         const huir = () => {
-            if (etapa === 1) { // Solo escapa cuando ya está la pregunta real
-                // El NO se mueve
-                const x = Math.random() * (window.innerWidth - noBtn.offsetWidth);
-                const y = Math.random() * (window.innerHeight - noBtn.offsetHeight);
+            if (etapa === 1) {
+                noBtn.style.position = "absolute";
+                const x = Math.random() * (window.innerWidth - noBtn.offsetWidth - 50);
+                const y = Math.random() * (window.innerHeight - noBtn.offsetHeight - 50);
                 noBtn.style.left = `${x}px`;
                 noBtn.style.top = `${y}px`;
 
-                // El SI crece cada vez que ella intenta dar al NO
-                siScale += 0.4;
+                siScale += 0.5;
                 siBtn.style.transform = `scale(${siScale})`;
             }
         };
@@ -148,7 +145,6 @@
         noBtn.addEventListener('mouseover', huir);
         noBtn.addEventListener('touchstart', (e) => { e.preventDefault(); huir(); });
 
-        // Corazones de fondo decorativos
         setInterval(() => {
             const c = document.createElement('div');
             c.classList.add('corazon-bg');
